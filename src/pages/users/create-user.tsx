@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth, db } from '../../../firebase'
 import { collection, query, where,  doc, setDoc } from "firebase/firestore";
 
-
+/*
 const [nombre, setNombre]= useState('')
 const [apellido, setApellido]= useState('')
 const [cedula, setCedula]= useState('')
@@ -13,10 +13,11 @@ const [celular, setCelular]= useState('')
 const [usuario ,setUsuario]= useState('')
 const [email ,setEmail]= useState('')
 const [password ,setPassword]= useState('')
+*/
 
 const CreateUser = () => {
 
-
+/*
   const Registrarusuario = async (e:any) => {
     e.preventDefault()
     try {
@@ -40,12 +41,13 @@ const CreateUser = () => {
         console.error(error)
     }
   }
+  */
   return (
     <Layout>
       <Box sx={{width:"100%", background:"white", p:2}}>
       <Typography variant='h6' component={"h1"} sx={{ my: 2 }}>Registrar Usuario</Typography>
       <Divider/>
-        <Box component={"form"} sx={{ m: 3 }} onSubmit={Registrarusuario}>
+        <Box component={"form"} sx={{ m: 3 }} //onSubmit={Registrarusuario}>
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Paper elevation={1} sx={{p:2}}>
@@ -57,7 +59,7 @@ const CreateUser = () => {
                   fullWidth
                   required
                   label={"Nombre"}
-                  onChange={e => setNombre(e.target.value)}
+                  //onChange={e => setNombre(e.target.value)}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -65,7 +67,7 @@ const CreateUser = () => {
                   fullWidth
                   required
                   label={"Apellido"}
-                  onChange={e => setApellido(e.target.value)}
+                 // onChange={e => setApellido(e.target.value)}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -74,7 +76,7 @@ const CreateUser = () => {
                   required
                   type='number'
                   label={"Cedula"}
-                  onChange={e => setCedula(e.target.value)}
+                 // onChange={e => setCedula(e.target.value)}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -83,7 +85,7 @@ const CreateUser = () => {
                   required
                   type='number'
                   label={"Celular"}
-                  onChange={e => setCelular(e.target.value)}
+                  //onChange={e => setCelular(e.target.value)}
                   />
                 </Grid>
               </Grid>
@@ -99,7 +101,7 @@ const CreateUser = () => {
                     fullWidth
                     required
                     label={"usuario"}
-                    onChange={e => setUsuario(e.target.value)}
+                   // onChange={e => setUsuario(e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -108,7 +110,7 @@ const CreateUser = () => {
                     required
                     type='email'
                     label={"email"}
-                    onChange={e => setEmail(e.target.value)}
+                   // onChange={e => setEmail(e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={6}>
@@ -117,7 +119,7 @@ const CreateUser = () => {
                     required
                     type='password'
                     label={"Contraseña"}
-                    onChange={e => setPassword(e.target.value)}
+                    //onChange={e => setPassword(e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={6}>
