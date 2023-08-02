@@ -14,7 +14,7 @@ const [usuario ,setUsuario]= useState('')
 const [email ,setEmail]= useState('')
 const [password ,setPassword]= useState('')
 
-const createUser = () => {
+const CreateUser = () => {
 
 
   const Registrarusuario = async (e:any) => {
@@ -135,4 +135,4 @@ const createUser = () => {
   )
 }
 
-export default createUser
+export default CreateUser
