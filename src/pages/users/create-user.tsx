@@ -47,7 +47,7 @@ const CreateUser = () => {
       <Box sx={{width:"100%", background:"white", p:2}}>
       <Typography variant='h6' component={"h1"} sx={{ my: 2 }}>Registrar Usuario</Typography>
       <Divider/>
-        <Box component={"form"} sx={{ m: 3 }} //onSubmit={Registrarusuario}>
+        <Box component={"form"} sx={{ m: 3 }} /*onSubmit={Registrarusuario}*/>
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Paper elevation={1} sx={{p:2}}>
