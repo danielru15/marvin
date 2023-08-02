@@ -1,18 +1,21 @@
-import Layout from '@/components/layout/Layout'
 import React,{useState} from 'react'
+import Layout from '@/components/layout/Layout'
 import { Box, Button, Divider, Grid, Paper, TextField, Typography } from '@mui/material'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth, db } from '../../../firebase'
 import { collection, query, where,  doc, setDoc } from "firebase/firestore";
 
+
+const [nombre, setNombre]= useState('')
+const [apellido, setApellido]= useState('')
+const [cedula, setCedula]= useState('')
+const [celular, setCelular]= useState('')
+const [usuario ,setUsuario]= useState('')
+const [email ,setEmail]= useState('')
+const [password ,setPassword]= useState('')
+
 const createUser = () => {
-  const [nombre, setNombre]= useState<string>('')
-  const [apellido, setApellido]= useState<string>('')
-  const [cedula, setCedula]= useState<string>()
-  const [celular, setCelular]= useState<string>()
-  const [usuario ,setUsuario]= useState<string>('')
-  const [email ,setEmail]= useState<string>('')
-  const [password ,setPassword]= useState<string>('')
+
 
   const Registrarusuario = async (e:any) => {
     e.preventDefault()
