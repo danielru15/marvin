@@ -22,9 +22,16 @@
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
     "firebase": "^10.1.0",
+    "formik": "^2.4.3",
+    "google-libphonenumber": "^3.2.32",
     "next": "13.4.12",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "typescript": "5.1.6"
+    "sweetalert2": "^11.7.20",
+    "typescript": "5.1.6",
+    "yup": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/google-libphonenumber": "^7.4.24"
   }
 }

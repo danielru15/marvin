@@ -68,7 +68,7 @@ export default function SignIn() {
               Sign In
             </Button>
           </Box>
-          <Link href="#" >
+          <Link href="/forgot-password" >
                   Forgot password?
           </Link>
         </Box>

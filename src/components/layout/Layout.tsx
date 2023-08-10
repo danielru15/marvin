@@ -4,6 +4,7 @@ import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MenuAppBar from '../Menubar';
 
+
 const Layout = ({children}:PropsWithChildren)  => {
     const DrawerHeader = styled('div')(({ theme }) => ({
         display: 'flex',
@@ -15,17 +16,19 @@ const Layout = ({children}:PropsWithChildren)  => {
       }))
       
   return (
-    <>
-    <MenuAppBar/>
-    <Box sx={{display:"flex"}}>
+    
+     <Box sx={{display:"flex"}}>
+        <MenuAppBar/>
         <Sidenav/>
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+
+        <Box component="main" sx={{ flexGrow: 1, p:3 }}>
         <DrawerHeader />
         {children}
       </Box>
         
     </Box>
-    </>
+    
+   
   )
 }
 

@@ -10,7 +10,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { Inbox, PeopleSharp, PersonAddSharp } from '@mui/icons-material';
+import { Inbox, Leaderboard, PeopleSharp, PersonAddSharp } from '@mui/icons-material';
 import { useRouter } from "next/router";
 
 const drawerWidth = 240;
@@ -76,8 +76,8 @@ export default function MiniDrawer() {
         <Divider />
         <List>
        
-        <ListItem disablePadding sx={{ display: 'block' }}>
-            <Tooltip title="datos shopify">
+        <ListItem disablePadding sx={{ display: 'block' }} onClick={() => push("/informe-dropi")}>
+            <Tooltip title="Infome dropi">
                 <ListItemButton
                     sx={{
                     minHeight: 48,
@@ -92,9 +92,9 @@ export default function MiniDrawer() {
                         justifyContent: 'center',
                     }}
                     >
-                 <Inbox/>
+                 <Leaderboard/>
                 </ListItemIcon>
-                <ListItemText primary={'Datos shopify'} sx={{ opacity: open ? 1 : 0 }} />
+                <ListItemText primary={'Infome dropi'} sx={{ opacity: open ? 1 : 0 }} />
                 </ListItemButton>
             </Tooltip>
         </ListItem>
