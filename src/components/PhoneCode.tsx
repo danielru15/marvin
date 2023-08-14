@@ -1,7 +1,7 @@
 import { countries } from '@/pages/api/countrysNumber'
 import { Autocomplete, Box, TextField } from '@mui/material'
 import React from 'react'
-const PhoneCode = ({setCountry, country}:any) => {
+const PhoneCode = ({setCountry}:any) => {
   return (
     <Autocomplete
                   id="country-select-demo"
@@ -9,7 +9,8 @@ const PhoneCode = ({setCountry, country}:any) => {
                   options={countries}
                   autoHighlight
                   getOptionLabel={(option) => option.label}
-                  onChange={(e,newValue) => setCountry({pais:newValue?.label,code:newValue?.phone})}
+                  onChange={(e,newValue) => setCountry({pais:newValue?.label,
+                    phonecode:newValue?.phone,code:newValue?.code})}
                 renderOption={(props, option) => (
                   <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props} >
                     <img
@@ -26,7 +27,7 @@ const PhoneCode = ({setCountry, country}:any) => {
                 <TextField
                 required
                 {...params}
-                label="Seleccione un país"
+                label="Choose a country"
                 inputProps={{
                ...params.inputProps,
                autoComplete: 'new-password', // disable autocomplete and autofill

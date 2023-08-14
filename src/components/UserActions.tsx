@@ -16,6 +16,7 @@ const UserActions = ({params, rowId, setRowId}:MyComponentProps) => {
         setLoading(true)
         //const {nombre,apellido,edad,id}= params.row
     }
+    console.log(params)
   return (
     <Box
         sx={{m:1,

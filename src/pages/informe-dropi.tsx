@@ -3,7 +3,7 @@ import React from 'react'
 
 const informeDropi = () => {
   return (
-    <Layout>
+    <Layout title={'informe'}>
       informe
     </Layout>
     

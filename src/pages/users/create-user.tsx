@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useState,useContext, FC, useEffect} from 'react'
 import Layout from '@/components/layout/Layout'
 import { Box, Button, Divider, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField, Typography } from '@mui/material'
 import { createUserWithEmailAndPassword} from 'firebase/auth'
@@ -7,40 +7,37 @@ import { collection, query, where,  doc, setDoc, getDocs, getDoc } from "firebas
 import { PhoneNumberUtil } from 'google-libphonenumber';
 import Swal from 'sweetalert2'
 import PhoneCode from '@/components/PhoneCode'
+import { DatosContext } from '@/Context/datosContext'
+import { format } from 'date-fns';
+import { Validar } from '@/interfaces/usuarios'
 
 
-const CreateUser = () => {
+const CreateUser:FC = () => {
+  const {
+      apellido, setApellido,cedula,  
+      setCedula, celular, setCelular, email, 
+      setEmail,rol,setRol,country ,setCountry
+    } = useContext(DatosContext)
   const usuariosdb = collection(db, "usuarios")
   const [nombre, setNombre]= useState<string>('')
-  const [apellido, setApellido]= useState<string>('')
-  const [cedula, setCedula]= useState<string>('')
-  const [celular, setCelular]= useState<string>('')
-  const [email ,setEmail]= useState<string>('')
-  const [country ,setCountry]= useState({
-    pais:'',
-    code:''
-  })
-  const [rol ,setRol]= useState<string>('')
-  const [validarEmail, setValidarEmail]= useState({
-    error:false,
-    message:'',
-    data:false
-  })
-  const [validarCedula, setValidarCedula]= useState({
-    error:false,
-    message:'',
-    data:false
-  })
-  const [validarCelular, setValidarCelular]= useState({
-    error:false,
-    message:'',
-    data:false
-  })
-  const [validarnombre, setValidarNombre]= useState({
+  
+  const [validarEmail, setValidarEmail]= useState<Validar>({
     error:false,
     message:''
   })
-  const [validarapellido, setValidarApellido]= useState({
+  const [validarCedula, setValidarCedula]= useState<Validar>({
+    error:false,
+    message:'',
+  })
+  const [validarCelular, setValidarCelular]= useState<Validar>({
+    error:false,
+    message:''
+  })
+  const [validarnombre, setValidarNombre]= useState<Validar>({
+    error:false,
+    message:''
+  })
+  const [validarapellido, setValidarApellido]= useState<Validar>({
     error:false,
     message:'',
   })
@@ -98,20 +95,17 @@ const CreateUser = () => {
         setValidarCedula({
           error:true,
           message:'ya se encuentra un usuario registrado con este documento',
-           data:false
         })
       }else {
         setValidarCedula({
           error:false,
-          message:'',
-           data:false
+          message:''
         })
       }
     }else {
       setValidarCedula({
         error:false,
-        message:'',
-         data:false
+        message:''
       })
 
     }
@@ -124,22 +118,19 @@ const CreateUser = () => {
       if(testEmail === true ){
         setValidarEmail({
           error:true,
-          message:'Correo electrónico inválido',
-           data:false
+          message:'Correo electrónico inválido'
         })
       }else {
         setValidarEmail({
           error:false,
-          message:'',
-           data:false
+          message:''
         })
       }
 
     }else{
       setValidarEmail({
         error:false,
-        message:'',
-         data:false
+        message:''
       })
     }
 
@@ -147,14 +138,12 @@ const CreateUser = () => {
       if(queryEmail === false){
         setValidarEmail({
           error:true,
-          message:'el email ya se encuentra registrado',
-           data:false
+          message:'el email ya se encuentra registrado'
         })
       }else {
         setValidarEmail({
           error:false,
-          message:'',
-           data:false
+          message:''
         })
       }
       
@@ -165,29 +154,25 @@ const CreateUser = () => {
   const validCelular = async () => {
     const querytCelular = (await getDocs(query(usuariosdb, where("celular", "==", celular)))).empty
  
-  if(celular !== '' && country.code !== '' && country.code !== undefined) {
+  if(celular !== '' && country.code !== '' && country.phonecode !== undefined) {
     const phoneNumberUtil = PhoneNumberUtil.getInstance()
-  const parsedNumber = phoneNumberUtil.parseAndKeepRawInput(`+${country.code}${celular}`, 'ZZ');
+  const parsedNumber = phoneNumberUtil.parseAndKeepRawInput(`+${country.phonecode}${celular}`, 'ZZ');
   isValid = phoneNumberUtil.isValidNumber(parsedNumber);
   const regionCode = phoneNumberUtil.getRegionCodeForNumber(parsedNumber)
-  console.log(parsedNumber)
     if(isValid){
       setValidarCelular({
         error:false,
-      message:'',
-      data:false
+      message:''
       })
       if(querytCelular === false){
         setValidarCelular({
           error:true,
-        message:'el numero ingresado ya se encuentra registrado',
-        data:false
+        message:'el numero ingresado ya se encuentra registrado'
         })
       }else {
         setValidarCelular({
           error:false,
-        message:'',
-        data:false
+        message:''
         })
   
       }
@@ -195,8 +180,7 @@ const CreateUser = () => {
     }else {
       setValidarCelular({
         error:true,
-      message:`el numero ingresado no es un numero valido para ${country?.pais+regionCode}`,
-      data:false
+      message:`el numero ingresado no es un numero valido para ${country?.pais+regionCode}`
       })
       setCelular('')
   
@@ -205,7 +189,6 @@ const CreateUser = () => {
     setValidarCelular({
       error:false,
     message:'',
-    data:false
     })
   }
   }
@@ -213,7 +196,7 @@ const CreateUser = () => {
 
 
 // Funcion Registrar
-  const Registrarusuario = async (e:any) => {
+  const Registrarusuario = async (e:React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const queryEmail =  await getDocs(query(usuariosdb, where("email", "==", email)))
     const querytCelular = await getDocs(query(usuariosdb, where("celular", "==", celular)))
@@ -221,21 +204,26 @@ const CreateUser = () => {
     try {
       if (queryCedula && queryEmail.empty && querytCelular) {
         const infoUser = await createUserWithEmailAndPassword(auth,email,cedula)
+        console.log(infoUser)
+        const fecha = infoUser.user.metadata.creationTime
+        const dateObj = new Date(fecha)
+        const formattedDate = format(dateObj, 'dd/MM/yyyy')
         await setDoc(doc(usuariosdb,cedula), {
             nombre:nombre,
             apellido:apellido,
             cedula:cedula,
-            celular:celular,
+            celular:`+${country.phonecode}${celular}`,
             email:email,
-            pais:country.pais,
-            active: false,
-            rol:rol
+            indicativo:country,
+            rol:rol,
+            id:infoUser.user.uid,
+            created_at:formattedDate,
+            lastLogin_at:''
         })
         
         
       }
       Swal.fire({
-        position: 'top-end',
         icon: 'success',
         title: 'Usuario registrado exitosamente',
         showConfirmButton: false,
@@ -247,8 +235,9 @@ const CreateUser = () => {
       setCelular('')
       setEmail('')
       setCountry({
-        pais:'',
-        code:''
+        label:'',
+        code:'',
+        phonecode:''
       })
 
     } catch (error) {
@@ -258,15 +247,12 @@ const CreateUser = () => {
   }
   
   return (
-    <Layout>
-      <Box sx={{width:"100%", background:"white", p:2}}>
-      <Typography variant='h6' component={"h1"} sx={{ my: 2 }}>Registrar Usuario</Typography>
-      <Divider/>
+    <Layout title={'Registrar Usuario'}>
         <Box component={"form"} sx={{ m: 3 }} onSubmit={Registrarusuario}>
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Paper elevation={1} sx={{p:2}}>
-              <Typography variant='h6' component={"h6"} sx={{ fontWeight:"bold" }}>Información personal</Typography>
+              <Typography variant='h6' component={"h6"}>Información personal</Typography>
               <Divider sx={{my:2}}/>
               <Grid container spacing={2}>
                   <Grid item xs={6}>
@@ -326,7 +312,7 @@ const CreateUser = () => {
             </Grid>
             <Grid item xs={6}>
             <Paper elevation={1} sx={{p:2}}>
-                <Typography variant='h6' component={"h6"} sx={{ fontWeight:"bold" }}>Información cuenta</Typography>
+                <Typography variant='h6' component={"h6"}>Información cuenta</Typography>
                 <Divider sx={{my:2}}/>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
@@ -352,10 +338,9 @@ const CreateUser = () => {
                     />
                   </Grid>
                   <Grid item xs={12}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth required>
                       <InputLabel id="demo-simple-select-label">Rol</InputLabel>
                       <Select
-                       required
                        labelId="demo-simple-select-label"
                        id="demo-simple-select"
                        value={rol}
@@ -363,9 +348,9 @@ const CreateUser = () => {
                        onChange={(e) => setRol(e.target.value)}
                       
                       >
-                        <MenuItem value={"admin"}>Admin</MenuItem>
-                        <MenuItem value={"editor"}>Editores</MenuItem>
-                        <MenuItem value={'inactivo'}>Inactivo</MenuItem>
+                        <MenuItem value={"Admin"}>Admin</MenuItem>
+                        <MenuItem value={"Editor"}>Editor</MenuItem>
+                        <MenuItem value={'Inactivo'}>Inactivo</MenuItem>
                       </Select>
                       
 
@@ -378,7 +363,7 @@ const CreateUser = () => {
           </Grid>
           <Button sx={{mt:2}} variant='contained' type="submit">Crear usuario</Button>
         </Box>
-      </Box>  
+      
     </Layout>
   )
 }
