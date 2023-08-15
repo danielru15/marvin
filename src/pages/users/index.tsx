@@ -2,18 +2,22 @@ import React, {FC, useContext, useEffect, useMemo, useRef, useState } from 'reac
 import Layout from '@/components/layout/Layout';
 import { DatosContext } from "../../Context/datosContext"
 import UserActions from '@/components/UserActions';
-import {  Avatar, Box,  IconButton, Link, Paper } from '@mui/material';
+import {  Avatar, Box,  IconButton, Link, Paper,CircularProgress, Fab, AlertProps, Snackbar, Alert } from '@mui/material';
 import { DataGrid, GridCellParams, GridColDef, gridClasses,  GridRowModesModel,
   GridRowModes,
   GridRowId,
   GridRowModel,
-  GridActionsCellItem,} from '@mui/x-data-grid';
+  GridActionsCellItem,
+  GridEventListener,
+  GridRowEditStopReasons,} from '@mui/x-data-grid';
 import { blue, green, grey } from '@mui/material/colors';
 import {  db} from '../../../firebase'
-import { collection,onSnapshot, query} from "firebase/firestore";
-import { Email, WhatsApp } from '@mui/icons-material';
+import { collection,onSnapshot, query ,doc, updateDoc} from "firebase/firestore";
+import { Cancel, Delete, Edit, Email, WhatsApp,Check, Save } from '@mui/icons-material';
 import WhatsappMessage from '@/components/WhatsappMessage';
 import { countries } from '../api/countrysNumber';
+
+
 
 
 const Index:FC = () => {
@@ -21,6 +25,13 @@ const Index:FC = () => {
   const [rowId, setRowId] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [num,setNum] = useState('')
+  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({})
+
+  const handleCloseSnackbar = () => setErrorMessage(null);
+  const [errorMessage, setErrorMessage] = useState<Pick<
+  AlertProps,
+  'children' | 'severity'
+> | null>(null)
   const controlModal = (params) => {
     setOpenModal(!openModal)
     setNum(params.row)
@@ -34,6 +45,35 @@ const findCountryByName = (countryName) => {
   return country ? country: null;
 };
 
+const handleEditClick = (params) => () => {
+  setRowModesModel({ ...rowModesModel, [params.id]: { mode: GridRowModes.Edit } })
+  setRowId(params.id)
+  
+}
+const handleRowModesModelChange = (newRowModesModel: GridRowModesModel,params) => {
+  setRowModesModel(newRowModesModel);
+  //const editedRow = datousuarios.find((row) => row.id === params.id);
+  //console.log(editedRow)
+}
+
+const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
+  console.log(params)
+  if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+    event.defaultMuiPrevented = true
+  
+  }
+}
+
+const handleSaveClick = (id: GridRowId) => () => {
+  setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+};
+
+const handleCancelClick = (id: GridRowId) => () => {
+  setRowModesModel({
+    ...rowModesModel,
+    [id]: { mode: GridRowModes.View, ignoreModifications: true },
+  });
+};
 
   const columns:GridColDef[] = [
     {
@@ -179,7 +219,43 @@ const findCountryByName = (countryName) => {
         field: 'actions',
         headerName: 'Acciones',
         type: 'actions',
-        renderCell: (params) => <UserActions {...{ params, rowId, setRowId }} />,
+        renderCell: (params) => {
+          const isInEditMode = rowModesModel[params.id]?.mode === GridRowModes.Edit
+          if (isInEditMode) {
+            return [
+              <Fab
+            color='primary'
+            sx={{
+                width:40,
+                height:40,
+                bgcolor:green[500],
+                '&:hover':{bgcolor:green[700]}
+            }}
+            disabled={params.id !== rowId}
+            onClick={handleSaveClick(params.id)}
+        >
+            <Save/>
+        </Fab>,
+              <GridActionsCellItem
+                icon={<Cancel />}
+                label="Cancel"
+                className="textPrimary"
+                onClick={handleCancelClick(params.id)}
+                color="inherit"
+              />,
+            ];
+          }
+  
+          return [
+            <GridActionsCellItem
+              icon={<Edit />}
+              label="Edit"
+              className="textPrimary"
+              onClick={handleEditClick(params)}
+              color="inherit"
+            />
+          ];
+        },
       },
     ]
     
@@ -226,8 +302,52 @@ const findCountryByName = (countryName) => {
     };
   }, []); // El arreglo de dependencias vacío asegura que el efecto se ejecute solo una vez al montar el componente
 
+
+  const validateEmail = (email) => {
+    const testEmail = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(
+      email
+    )
+
+    return testEmail
+  }
+
+
+
+
+   const rowudapted = async (updatedRow) => {
+    const {celular, email,rol ,cedula,indicativo  } =  updatedRow
+    const usuarioDocRef =  doc(db,'usuarios', cedula)
+
+    const isEmailValid = validateEmail(email);
+    if (!isEmailValid) {
+      throw new Error('El correo electrónico no es válido o no puede ser vacio');
+    }
+
+
+    
+    try {
+      await updateDoc(usuarioDocRef, {
+        celular:celular,
+        email:email,
+        rol:rol,
+        indicativo:indicativo
+       })
+       setErrorMessage({ children: 'Usuario actualizado correctamente.', severity: 'success' });
+       return updatedRow
+   } catch (error) {
+      handleProcessRowUpdateError(error);
+      return null;
    
-  
+   }
+   }
+ 
+
+    const handleProcessRowUpdateError = (error: Error) => {
+
+      const err = 'Cannot read properties of null (reading )'
+    setErrorMessage({ children: error.message, severity: 'error' });
+  };
+
   return (
     <Layout title='usuarios'>
          <WhatsappMessage openModal={openModal} params={num} closemodal={closemodal}/>
@@ -260,12 +380,19 @@ const findCountryByName = (countryName) => {
                     backgroundColor: `rgb(126,10,15, 0.1)`,
                     color: '#750f0f',
                   },
+                  '& .editable': {
+                    bgcolor: '#744747',
+                    textTransform:'capitalize'
+                  }
                 }}
                 editMode='row'
-                filterMode="server"
-                
-                onRowEditStart={(params) => setRowId(params.row.id)}
-                onRowEditStop={(params) => setRowId(null)}
+                onRowEditStop={handleRowEditStop}
+                rowModesModel={rowModesModel}
+                processRowUpdate={(updatedRow, originalRow) =>
+                  rowudapted(updatedRow)
+                }
+                onProcessRowUpdateError={handleProcessRowUpdateError}
+                onRowModesModelChange={handleRowModesModelChange}
                 initialState={{
                   pagination: {
                     paginationModel: {
@@ -276,7 +403,16 @@ const findCountryByName = (countryName) => {
                 
                 pageSizeOptions={[5,10,20]}
               />
-              
+              {!!errorMessage && (
+        <Snackbar
+          open
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          onClose={handleCloseSnackbar}
+          autoHideDuration={6000}
+        >
+          <Alert {...errorMessage} onClose={handleCloseSnackbar} />
+        </Snackbar>
+      )}
 
       </Paper>
     </Layout>

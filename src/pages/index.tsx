@@ -1,248 +1,149 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
 import {
-  GridRowsProp,
-  GridRowModesModel,
-  GridRowModes,
   DataGrid,
-  GridColDef,
-  GridToolbarContainer,
-  GridActionsCellItem,
-  GridEventListener,
-  GridRowId,
   GridRowModel,
-  GridRowEditStopReasons,
+  GridColDef,
+  GridRowId,
+  GridRowsProp,
 } from '@mui/x-data-grid';
 import {
   randomCreatedDate,
   randomTraderName,
-  randomId,
-  randomArrayItem,
+  randomUpdatedDate,
 } from '@mui/x-data-grid-generator';
+import Snackbar from '@mui/material/Snackbar';
+import Alert, { AlertProps } from '@mui/material/Alert';
 
-const roles = ['Market', 'Finance', 'Development'];
-const randomRole = () => {
-  return randomArrayItem(roles);
+interface User {
+  name: string;
+  age: number;
+  id: GridRowId;
+  dateCreated: Date;
+  lastLogin: Date;
+}
+
+const useFakeMutation = () => {
+  return React.useCallback(
+    (user: Partial<User>) =>
+      new Promise<Partial<User>>((resolve, reject) => {
+        setTimeout(() => {
+          if (user.name?.trim() === '') {
+            reject(new Error("Error while saving user: name can't be empty."));
+          } else {
+            resolve({ ...user, name: user.name?.toUpperCase() });
+          }
+        }, 200);
+      }),
+    [],
+  );
 };
 
-const initialRows: GridRowsProp = [
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 25,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 36,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 19,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 28,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-  {
-    id: randomId(),
-    name: randomTraderName(),
-    age: 23,
-    joinDate: randomCreatedDate(),
-    role: randomRole(),
-  },
-];
+export default function ServerSidePersistence() {
+  const mutateRow = useFakeMutation();
 
-interface EditToolbarProps {
-  setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
-  setRowModesModel: (
-    newModel: (oldModel: GridRowModesModel) => GridRowModesModel,
-  ) => void;
-}
+  const [snackbar, setSnackbar] = React.useState<Pick<
+    AlertProps,
+    'children' | 'severity'
+  > | null>(null);
 
-function EditToolbar(props: EditToolbarProps) {
-  const { setRows, setRowModesModel } = props;
+  const handleCloseSnackbar = () => setSnackbar(null);
 
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [...oldRows, { id, name: '', age: '', isNew: true }]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: 'name' },
-    }));
-  };
-
-  return (
-    <GridToolbarContainer>
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-        Add record
-      </Button>
-    </GridToolbarContainer>
+  const processRowUpdate = React.useCallback(
+    async (newRow: GridRowModel) => {
+      // Make the HTTP request to save in the backend
+      const response = await mutateRow(newRow);
+      setSnackbar({ children: 'User successfully saved', severity: 'success' });
+      return response;
+    },
+    [mutateRow],
   );
-}
 
-export default function FullFeaturedCrudGrid() {
-  const [rows, setRows] = React.useState(initialRows);
-  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({});
-
-  const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
-  };
-
-  const handleEditClick = (id: GridRowId) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
-
-  const handleSaveClick = (id: GridRowId) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-  };
-
-  const handleDeleteClick = (id: GridRowId) => () => {
-    setRows(rows.filter((row) => row.id !== id));
-  };
-
-  const handleCancelClick = (id: GridRowId) => () => {
-    setRowModesModel({
-      ...rowModesModel,
-      [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    });
-
-    const editedRow = rows.find((row) => row.id === id);
-    if (editedRow!.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
-    }
-  };
-
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
-  };
-
-  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
-
-  const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Name', width: 180, editable: true },
-    {
-      field: 'age',
-      headerName: 'Age',
-      type: 'number',
-      width: 80,
-      align: 'left',
-      headerAlign: 'left',
-      editable: true,
-    },
-    {
-      field: 'joinDate',
-      headerName: 'Join date',
-      type: 'date',
-      width: 180,
-      editable: true,
-    },
-    {
-      field: 'role',
-      headerName: 'Department',
-      width: 220,
-      editable: true,
-      type: 'singleSelect',
-      valueOptions: ['Market', 'Finance', 'Development'],
-    },
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Actions',
-      width: 100,
-      cellClassName: 'actions',
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{
-                color: 'primary.main',
-              }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
-
-        return [
-          <GridActionsCellItem
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
-        ];
-      },
-    },
-  ];
+  const handleProcessRowUpdateError = React.useCallback((error: Error) => {
+    setSnackbar({ children: error.message, severity: 'error' });
+  }, []);
 
   return (
-    <Box
-      sx={{
-        height: 500,
-        width: '100%',
-        '& .actions': {
-          color: 'text.secondary',
-        },
-        '& .textPrimary': {
-          color: 'text.primary',
-        },
-      }}
-    >
+    <div style={{ height: 400, width: '100%' }}>
       <DataGrid
         rows={rows}
         columns={columns}
-        editMode="row"
-        rowModesModel={rowModesModel}
-        onRowModesModelChange={handleRowModesModelChange}
-        onRowEditStop={handleRowEditStop}
         processRowUpdate={processRowUpdate}
-        slots={{
-          toolbar: EditToolbar,
-        }}
-        slotProps={{
-          toolbar: { setRows, setRowModesModel },
-        }}
+        onProcessRowUpdateError={handleProcessRowUpdateError}
       />
-    </Box>
+      {!!snackbar && (
+        <Snackbar
+          open
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          onClose={handleCloseSnackbar}
+          autoHideDuration={6000}
+        >
+          <Alert {...snackbar} onClose={handleCloseSnackbar} />
+        </Snackbar>
+      )}
+    </div>
   );
 }
+
+const columns: GridColDef[] = [
+  { field: 'name', headerName: 'Name', width: 180, editable: true },
+  {
+    field: 'age',
+    headerName: 'Age',
+    type: 'number',
+    editable: true,
+    align: 'left',
+    headerAlign: 'left',
+  },
+  {
+    field: 'dateCreated',
+    headerName: 'Date Created',
+    type: 'date',
+    width: 180,
+    editable: true,
+  },
+  {
+    field: 'lastLogin',
+    headerName: 'Last Login',
+    type: 'dateTime',
+    width: 220,
+    editable: true,
+  },
+];
+
+const rows: GridRowsProp = [
+  {
+    id: 1,
+    name: randomTraderName(),
+    age: 25,
+    dateCreated: randomCreatedDate(),
+    lastLogin: randomUpdatedDate(),
+  },
+  {
+    id: 2,
+    name: randomTraderName(),
+    age: 36,
+    dateCreated: randomCreatedDate(),
+    lastLogin: randomUpdatedDate(),
+  },
+  {
+    id: 3,
+    name: randomTraderName(),
+    age: 19,
+    dateCreated: randomCreatedDate(),
+    lastLogin: randomUpdatedDate(),
+  },
+  {
+    id: 4,
+    name: randomTraderName(),
+    age: 28,
+    dateCreated: randomCreatedDate(),
+    lastLogin: randomUpdatedDate(),
+  },
+  {
+    id: 5,
+    name: randomTraderName(),
+    age: 23,
+    dateCreated: randomCreatedDate(),
+    lastLogin: randomUpdatedDate(),
+  },
+];

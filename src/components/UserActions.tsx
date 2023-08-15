@@ -9,14 +9,14 @@ interface MyComponentProps {
     rowId: string | null;
     setRowId: (value: string | null) => void;
   }
-const UserActions = ({params, rowId, setRowId}:MyComponentProps) => {
+const UserActions = ({newData,params, rowId, setRowId}) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [success, setSuccess] = useState<boolean>(false)
     const actualizarData = () => {
-        setLoading(true)
+        console.log(newData)
         //const {nombre,apellido,edad,id}= params.row
     }
-    console.log(params)
+    
   return (
     <Box
         sx={{m:1,
@@ -24,17 +24,6 @@ const UserActions = ({params, rowId, setRowId}:MyComponentProps) => {
         }}
     >
         {
-            success ? 
-            <Fab
-                color='success'
-                sx={{
-                    width:40,
-                    height:40
-                }}
-            >
-                <Check/>
-            </Fab>
-            :
             <Fab
             color='primary'
             sx={{
@@ -49,14 +38,6 @@ const UserActions = ({params, rowId, setRowId}:MyComponentProps) => {
             <Save/>
         </Fab>
         }
-        {loading && <CircularProgress size={52} sx={{
-            color:green[500],
-            position:'absolute',
-            top:-6,
-            lef:-6,
-            zIndex:1
-
-        }}/>}
     </Box>
   )
 }
