@@ -36,33 +36,20 @@ export const DatosProvider = ({ children }:PropsWithChildren) => {
 const formatPhoneNumber = (phoneNumber: string): string => {
 
   if(phoneNumber !== '' || phoneNumber !== undefined || phoneNumber !== null){
-  const phoneNumberUtil = PhoneNumberUtil.getInstance();
-  const parsedNumber = phoneNumberUtil.parse(phoneNumber);
-  const formattedNumber: string = phoneNumberUtil.format(parsedNumber, PhoneNumberFormat.INTERNATIONAL)
+  const phoneNumberUtil = PhoneNumberUtil?.getInstance();
+  const parsedNumber = phoneNumberUtil?.parse(phoneNumber);
+  const formattedNumber: string = phoneNumberUtil?.format(parsedNumber, PhoneNumberFormat.INTERNATIONAL)
 
   return formattedNumber
   }
 };
 
 
-const formatIdNumber = (idNumber: string):string => {
-  const formattedParts : string[] = [];
-  if (idNumber.length % 3 === 1) {
-    formattedParts.push(idNumber.substring(0, 1));
-    idNumber = idNumber.substring(1);
-  }
-
-  for (let i = 0; i < idNumber.length; i += 3) {
-    formattedParts.push(idNumber.substring(i, i + 3));
-  }
-
-  return formattedParts.join('.');
-}
 
   
     return(
         <DatosContext.Provider value={{
-          formatIdNumber,
+          
           formatPhoneNumber,
           getRandomColor,
             drawerWidth,

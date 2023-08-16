@@ -1,8 +1,7 @@
-import React, {FC, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {FC, useContext, useEffect, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { DatosContext } from "../../Context/datosContext"
-import UserActions from '@/components/UserActions';
-import {  Avatar, Box,  IconButton, Link, Paper,CircularProgress, Fab, AlertProps, Snackbar, Alert } from '@mui/material';
+import {  Avatar, Box,  IconButton, Link, Paper,CircularProgress, Fab, AlertProps, Snackbar, Alert, Typography } from '@mui/material';
 import { DataGrid, GridCellParams, GridColDef, gridClasses,  GridRowModesModel,
   GridRowModes,
   GridRowId,
@@ -12,11 +11,12 @@ import { DataGrid, GridCellParams, GridColDef, gridClasses,  GridRowModesModel,
   GridRowEditStopReasons,} from '@mui/x-data-grid';
 import { blue, green, grey } from '@mui/material/colors';
 import {  db} from '../../../firebase'
-import { collection,onSnapshot, query ,doc, updateDoc} from "firebase/firestore";
-import { Cancel, Delete, Edit, Email, WhatsApp,Check, Save } from '@mui/icons-material';
+import { collection,onSnapshot, query ,doc, updateDoc, getDocs, where} from "firebase/firestore";
+import { Cancel, Delete, Edit, Email, WhatsApp, Save } from '@mui/icons-material';
 import WhatsappMessage from '@/components/WhatsappMessage';
 import { countries } from '../api/countrysNumber';
-
+import { PhoneNumberUtil } from 'google-libphonenumber';
+import { number } from 'yup';
 
 
 
@@ -26,7 +26,8 @@ const Index:FC = () => {
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [num,setNum] = useState('')
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>({})
-
+// Crear la consulta a la colección "usuarios"
+const usuarios = query(collection(db, 'usuarios'));
   const handleCloseSnackbar = () => setErrorMessage(null);
   const [errorMessage, setErrorMessage] = useState<Pick<
   AlertProps,
@@ -57,7 +58,6 @@ const handleRowModesModelChange = (newRowModesModel: GridRowModesModel,params) =
 }
 
 const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
-  console.log(params)
   if (params.reason === GridRowEditStopReasons.rowFocusOut) {
     event.defaultMuiPrevented = true
   
@@ -124,7 +124,7 @@ const handleCancelClick = (id: GridRowId) => () => {
         headerClassName: 'super-app-theme--header',
         field: 'indicativo',
         headerAlign: 'left',
-        headerName: 'Indicativo',
+        headerName: 'Indicativo*',
         editable:true,
         type: 'singleSelect',
         pinnable:true,
@@ -155,7 +155,7 @@ const handleCancelClick = (id: GridRowId) => () => {
         headerClassName: 'super-app-theme--header',
         field: 'celular',
         headerAlign: 'left',
-        headerName: 'Celular',
+        headerName: 'Celular*',
         editable: true,
         renderCell: (params) => (
           
@@ -163,7 +163,7 @@ const handleCancelClick = (id: GridRowId) => () => {
             <IconButton sx={{ color:green[500] }} onClick={e => controlModal(params)}>
               <WhatsApp  />
             </IconButton>
-            {formatPhoneNumber(params.value)}
+            {params?.value}
           </Box>
          
         )
@@ -173,7 +173,7 @@ const handleCancelClick = (id: GridRowId) => () => {
         flex:1,
         headerClassName: 'super-app-theme--header',
         field: 'email',
-        headerName: 'Email',
+        headerName: 'Email*',
         editable: true,
         renderCell: (params) => (
           <Box display="flex" alignItems="center">
@@ -192,7 +192,7 @@ const handleCancelClick = (id: GridRowId) => () => {
         flex:1,
         headerClassName: 'super-app-theme--header',
         field: 'rol',
-        headerName: 'Rol',
+        headerName: 'Rol*',
         type: 'singleSelect',
         valueOptions: ['Admin', 'Editor', 'Inactivo'],
         editable: true,
@@ -262,8 +262,7 @@ const handleCancelClick = (id: GridRowId) => () => {
 
 
   useEffect(() => {
-    // Crear la consulta a la colección "usuarios"
-    const usuarios = query(collection(db, 'usuarios'));
+    
 
     // Establecer un observador para recibir actualizaciones en tiempo real
     const unsubscribe = onSnapshot(usuarios, (querySnapshot) => {
@@ -312,25 +311,39 @@ const handleCancelClick = (id: GridRowId) => () => {
   }
 
 
-
+  
 
    const rowudapted = async (updatedRow) => {
     const {celular, email,rol ,cedula,indicativo  } =  updatedRow
     const usuarioDocRef =  doc(db,'usuarios', cedula)
-
+    const phone = findCountryByName(indicativo?.code ? indicativo?.code  : indicativo)
     const isEmailValid = validateEmail(email);
+
+    const phoneNumberUtil = PhoneNumberUtil.getInstance()
+  const parsedNumber = phoneNumberUtil.parseAndKeepRawInput(`+${phone.phone}${celular}`, 'ZZ');
+  const isValid = phoneNumberUtil.isValidNumber(parsedNumber);
+    
+
     if (!isEmailValid) {
       throw new Error('El correo electrónico no es válido o no puede ser vacio');
     }
-
+   
+    if(isValid === false ){
+      throw new Error(`El numero ${celular} no es válido para ${phone.label} `);
+    }
+    
 
     
     try {
       await updateDoc(usuarioDocRef, {
-        celular:celular,
+        celular:`+${phone.phone}${celular}`,
         email:email,
         rol:rol,
-        indicativo:indicativo
+        indicativo:{
+          code:phone.code,
+          phonecode:phone.phone,
+          label:phone.label
+        }
        })
        setErrorMessage({ children: 'Usuario actualizado correctamente.', severity: 'success' });
        return updatedRow
@@ -351,6 +364,7 @@ const handleCancelClick = (id: GridRowId) => () => {
   return (
     <Layout title='usuarios'>
          <WhatsappMessage openModal={openModal} params={num} closemodal={closemodal}/>
+         <Typography variant='h6' >Las columnas marcadas con * son editables</Typography>
       <Paper elevation={1} >
       <DataGrid
                 columns={columns}
