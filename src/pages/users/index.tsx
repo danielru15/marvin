@@ -49,7 +49,7 @@ const findCountryByName = (countryName) => {
 const handleEditClick = (params) => () => {
   setRowModesModel({ ...rowModesModel, [params.id]: { mode: GridRowModes.Edit } })
   setRowId(params.id)
-  
+ 
 }
 const handleRowModesModelChange = (newRowModesModel: GridRowModesModel,params) => {
   setRowModesModel(newRowModesModel);
@@ -65,7 +65,7 @@ const handleRowEditStop: GridEventListener<'rowEditStop'> = (params, event) => {
 }
 
 const handleSaveClick = (id: GridRowId) => () => {
-  setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+  setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } })
 };
 
 const handleCancelClick = (id: GridRowId) => () => {
@@ -299,8 +299,9 @@ const handleCancelClick = (id: GridRowId) => () => {
     return () => {
       unsubscribe();
     };
-  }, []); // El arreglo de dependencias vacío asegura que el efecto se ejecute solo una vez al montar el componente
-
+  }, []);
+   // El arreglo de dependencias vacío asegura que el efecto se ejecute solo una vez al montar el componente
+  
 
   const validateEmail = (email) => {
     const testEmail = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(
@@ -314,23 +315,25 @@ const handleCancelClick = (id: GridRowId) => () => {
   
 
    const rowudapted = async (updatedRow) => {
-    const {celular, email,rol ,cedula,indicativo  } =  updatedRow
-    const usuarioDocRef =  doc(db,'usuarios', cedula)
+    const {celular, email,rol ,cedula,indicativo,id  } =  updatedRow
+    const usuarioDocRef =  doc(db,'usuarios', id)
     const phone = findCountryByName(indicativo?.code ? indicativo?.code  : indicativo)
     const isEmailValid = validateEmail(email);
 
+    /*
     const phoneNumberUtil = PhoneNumberUtil.getInstance()
   const parsedNumber = phoneNumberUtil.parseAndKeepRawInput(`+${phone.phone}${celular}`, 'ZZ');
   const isValid = phoneNumberUtil.isValidNumber(parsedNumber);
-    
+  if(isValid === false ){
+      throw new Error(`El numero ${celular} no es válido para ${phone.label} `);
+    }
+    */
 
     if (!isEmailValid) {
       throw new Error('El correo electrónico no es válido o no puede ser vacio');
     }
    
-    if(isValid === false ){
-      throw new Error(`El numero ${celular} no es válido para ${phone.label} `);
-    }
+    
     
 
     

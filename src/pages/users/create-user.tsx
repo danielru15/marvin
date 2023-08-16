@@ -204,11 +204,10 @@ const CreateUser:FC = () => {
     try {
       if (queryCedula && queryEmail.empty && querytCelular) {
         const infoUser = await createUserWithEmailAndPassword(auth,email,cedula)
-        console.log(infoUser)
         const fecha = infoUser.user.metadata.creationTime
         const dateObj = new Date(fecha)
         const formattedDate = format(dateObj, 'dd/MM/yyyy')
-        await setDoc(doc(usuariosdb,cedula), {
+        await setDoc(doc(usuariosdb,infoUser.user.uid), {
             nombre:nombre,
             apellido:apellido,
             cedula:cedula,
@@ -220,7 +219,6 @@ const CreateUser:FC = () => {
             created_at:formattedDate,
             lastLogin_at:''
         })
-        
         
       }
       Swal.fire({
