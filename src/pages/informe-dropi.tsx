@@ -5,7 +5,7 @@ import { blue, green, grey } from '@mui/material/colors';
 import React, { useEffect, useState } from 'react'
 import * as XLSX from 'xlsx';
 
-const informeDropi = () => {
+const InformeDropi = () => {
   type OrderData = Record<string, any>;
   const [datosDropi, setDatosDropi] = useState<OrderData[]>([])
   const [productStats, setProductStats] = useState({
@@ -597,4 +597,4 @@ useEffect(() => {
   )
 }
 
-export default informeDropi
+export default InformeDropi
