@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, PropsWithChildren} from "react";
 import { auth, db } from "../../firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useRouter } from "next/router";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 export { useContext,useEffect } from "react";
 
 
@@ -29,19 +29,29 @@ export const AuthProvider = ({ children }:PropsWithChildren) => {
         return finalData
     }
 
+    const LastLogin = async (id:string,lastlogin) => {
+        const docRef = doc(db, 'usuarios', id);
+       const data = await updateDoc(docRef, {
+        lastLogin_at:lastlogin
+            
+           })
+        return data
+    }
+
     useEffect(() => {
     const unsuscribe =onAuthStateChanged(auth, userAuth => {
         if(!userAuth){
             router.push('/login')
+            setUser(null)
         }
 
         if(userAuth){
-            console.log(userAuth)
+            LastLogin(userAuth.uid,userAuth.metadata.lastSignInTime) 
             getUserById (userAuth.uid).then((data)=> {
                 setUser(data)
-                console.log(data)
-            })
-            
+            })    
+        }else {
+            setUser(null)
         }
 
         
@@ -55,7 +65,7 @@ export const AuthProvider = ({ children }:PropsWithChildren) => {
     
   
     return(
-        <AuthContext.Provider value={{user,login,logout}}>
+        <AuthContext.Provider value={{user,login,logout,getUserById}}>
         {children}
         </AuthContext.Provider>
     )

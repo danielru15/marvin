@@ -218,7 +218,7 @@ const CreateUser:FC = () => {
             id:infoUser.user.uid,
             created_at:formattedDate,
             lastLogin_at:''
-        })
+        },{ merge: true })
         
       }
       Swal.fire({
@@ -354,7 +354,15 @@ const CreateUser:FC = () => {
 
                     </FormControl>
                   </Grid>
-
+                  <Grid item xs={12}>
+                  <TextField
+                    label="Acerca de"
+                    multiline
+                    rows={2}
+                    variant="outlined"
+                    fullWidth
+                  />
+                  </Grid>
                 </Grid>
               </Paper>
             </Grid>

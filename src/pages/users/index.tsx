@@ -1,11 +1,10 @@
 import React, {FC, useContext, useEffect, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { DatosContext } from "../../Context/datosContext"
-import {  Avatar, Box,  IconButton, Link, Paper,CircularProgress, Fab, AlertProps, Snackbar, Alert, Typography } from '@mui/material';
+import {  Avatar, Box,  IconButton, Link, Paper, Fab, AlertProps, Snackbar, Alert, Typography } from '@mui/material';
 import { DataGrid, GridCellParams, GridColDef, gridClasses,  GridRowModesModel,
   GridRowModes,
   GridRowId,
-  GridRowModel,
   GridActionsCellItem,
   GridEventListener,
   GridRowEditStopReasons,} from '@mui/x-data-grid';
@@ -15,8 +14,8 @@ import { collection,onSnapshot, query ,doc, updateDoc, getDocs, where} from "fir
 import { Cancel, Delete, Edit, Email, WhatsApp, Save } from '@mui/icons-material';
 import WhatsappMessage from '@/components/WhatsappMessage';
 import { countries } from '../api/countrysNumber';
-import { PhoneNumberUtil } from 'google-libphonenumber';
-import { number } from 'yup';
+import { format, parseISO } from 'date-fns';
+import { parse } from 'path';
 
 
 
@@ -213,6 +212,18 @@ const handleCancelClick = (id: GridRowId) => () => {
         field: 'lastLogin_at',
         headerName: 'Ultima conexión',
         editable: false,
+        renderCell: (params) => {
+          if (!params.value) {
+            return null; // No renderizar si no hay fecha
+          }
+    
+          const originalDate = params.value;
+          // Convertir el formato de fecha original a ISO 8601
+          const isoDate = new Date(originalDate).toISOString();
+          const parsedDate = parseISO(isoDate);
+          const formattedDate = format(parsedDate, 'd/M/yyyy, HH:mm');
+          return <div>{formattedDate}</div>;
+        }
       },
       {
         headerClassName: 'super-app-theme--header',

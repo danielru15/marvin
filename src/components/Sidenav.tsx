@@ -77,7 +77,7 @@ export default function MiniDrawer() {
         <List>
        
         <ListItem disablePadding sx={{ display: 'block' }} onClick={() => push("/informe-dropi")}>
-            <Tooltip title="Infome dropi">
+            <Tooltip title="Informe Financiero DROPI">
                 <ListItemButton
                     sx={{
                     minHeight: 48,
@@ -94,7 +94,7 @@ export default function MiniDrawer() {
                     >
                  <Leaderboard/>
                 </ListItemIcon>
-                <ListItemText primary={'Infome dropi'} sx={{ opacity: open ? 1 : 0 }} />
+                <ListItemText primary={'Informe DROPI'} sx={{ opacity: open ? 1 : 0 }} />
                 </ListItemButton>
             </Tooltip>
         </ListItem>

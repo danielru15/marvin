@@ -10,7 +10,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import { DatosContext } from "../Context/datosContext"
 import { Avatar, Divider, ListItemIcon, Tooltip } from '@mui/material';
-import { Logout } from '@mui/icons-material';
+import { Logout, ManageAccounts } from '@mui/icons-material';
 import { AuthContext } from '@/Context/authContext';
 import { useRouter } from 'next/router';
 
@@ -28,7 +28,7 @@ export default function MenuAppBar() {
     setAnchorEl(null);
   };
   
-
+  const bgColor = user?.nombre ? getRandomColor(user.nombre) : 'black';
   interface AppBarProps extends MuiAppBarProps {
     open?: boolean;
   }
@@ -82,8 +82,8 @@ export default function MenuAppBar() {
             aria-haspopup="true"
             aria-expanded={openM ? 'true' : undefined}
           >
-            <Avatar sx={{bgcolor: 'black' , textTransform:'capitalize'}} >
-            {`de`}
+            <Avatar sx={{bgcolor:bgColor , textTransform:'uppercase'}} >
+            {`${user?.nombre[0]}${user?.apellido[0]}`}
             </Avatar>
           </IconButton>
         </Tooltip>
@@ -97,40 +97,14 @@ export default function MenuAppBar() {
         open={openM}
         onClose={handleClose}
         onClick={handleClose}
-        PaperProps={{
-          elevation: 0,
-          sx: {
-            overflow: 'visible',
-            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-            mt: 1.5,
-            '& .MuiAvatar-root': {
-              width: 32,
-              height: 32,
-              ml: -0.5,
-              mr: 1,
-            },
-            '&:before': {
-              content: '""',
-              display: 'block',
-              position: 'absolute',
-              top: 0,
-              right: 14,
-              width: 10,
-              height: 10,
-              bgcolor: 'background.paper',
-              transform: 'translateY(-50%) rotate(45deg)',
-              zIndex: 0,
-            },
-          },
-        }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
       >
-        <MenuItem >
-          {`Bienvenido(a) ${user?.nombre} ${user?.apellido}`}
-        </MenuItem >
-        <MenuItem >
-          mi perfil
+        <MenuItem onClick={() => push(`/users/${user.id}`)} >
+        <ListItemIcon>
+            <ManageAccounts fontSize="small" />
+          </ListItemIcon>
+          Mi perfil
         </MenuItem>
         <Divider />
         <MenuItem onClick={logout}>
