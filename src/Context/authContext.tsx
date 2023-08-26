@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }:PropsWithChildren) => {
             unsuscribe();
           };
     })  
-    }, [useRouter ])
+    }, [router ])
 
   
     
