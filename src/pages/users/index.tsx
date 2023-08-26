@@ -236,6 +236,7 @@ const handleCancelClick = (id: GridRowId) => () => {
           if (isInEditMode) {
             return [
               <Fab
+              key={params.id}
             color='primary'
             sx={{
                 width:40,
@@ -250,6 +251,7 @@ const handleCancelClick = (id: GridRowId) => () => {
         </Fab>,
               <GridActionsCellItem
                 icon={<Cancel />}
+                key={params.id}
                 label="Cancel"
                 className="textPrimary"
                 onClick={handleCancelClick(params.id)}
@@ -262,6 +264,7 @@ const handleCancelClick = (id: GridRowId) => () => {
             <GridActionsCellItem
               icon={<Edit />}
               label="Edit"
+              key={params.id}
               className="textPrimary"
               onClick={handleEditClick(params)}
               color="inherit"
