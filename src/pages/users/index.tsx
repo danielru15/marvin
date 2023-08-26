@@ -137,6 +137,7 @@ const handleCancelClick = (id: GridRowId) => () => {
           return (
             <div style={{ display: 'flex', alignItems: 'center' }}>
                 <img
+                   key={selectedCountry?.label}
                   src={`https://flagcdn.com/w20/${selectedCountry?.toLowerCase()}.png`}
                   srcSet={`https://flagcdn.com/w40/${selectedCountry?.toLowerCase()}.png 2x`}
                   alt={selectedCountry?.label}
